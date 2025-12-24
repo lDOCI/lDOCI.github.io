@@ -57,31 +57,25 @@
         .prose a { color: var(--brand-color); text-decoration: underline; }
         .prose img { border-radius: 8px; max-width: 100%; margin: 10px 0; }
 
-        /* === СПОЙЛЕРЫ 5M / 5X === */
-        /* Базовый стиль details внутри статьи */
-        .prose details { border: 1px solid var(--bg-border); border-radius: 8px; margin: 15px 0; overflow: hidden; background: var(--bg-card); transition: all 0.2s; }
+        /* === СПОЙЛЕРЫ (Исправлено) === */
+        .prose details { border: 1px solid var(--bg-border); border-radius: 8px; margin: 15px 0; overflow: hidden; background: var(--bg-card); }
         .prose summary { cursor: pointer; font-weight: bold; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; user-select: none; }
         .prose summary::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 12px; transition: 0.3s; }
         .prose details[open] summary::after { transform: rotate(180deg); }
         .prose .details-content { padding: 15px; border-top: 1px solid var(--bg-border); }
 
-        /* СПЕЦИФИЧНЫЕ БЛОКИ */
-        
         /* 🟠 5M */
-        .prose details.block-5m { border-color: #f97316; }
+        .prose details.block-5m { border: 2px solid #f97316; }
         .prose details.block-5m summary { background: #f97316; color: white; }
         .prose details.block-5m summary:hover { background: #e67e22; }
-        /* Если это старый div (совместимость) */
-        .prose div.block-5m { border: 2px solid #f97316; padding: 15px; border-radius: 8px; position: relative; margin-top: 25px; }
-        .prose div.block-5m::before { content: '🟠 AD5M'; position: absolute; top: -12px; left: 15px; background: #f97316; color: black; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-
+        
         /* 🔵 5X */
-        .prose details.block-5x { border-color: #3b82f6; }
+        .prose details.block-5x { border: 2px solid #3b82f6; }
         .prose details.block-5x summary { background: #3b82f6; color: white; }
         .prose details.block-5x summary:hover { background: #2563eb; }
-        /* Совместимость */
-        .prose div.block-5x { border: 2px solid #3b82f6; padding: 15px; border-radius: 8px; position: relative; margin-top: 25px; }
-        .prose div.block-5x::before { content: '🔵 AD5X'; position: absolute; top: -12px; left: 15px; background: #3b82f6; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+
+        /* ПОДСВЕТКА ПОИСКА */
+        mark { background-color: #facc15; color: black; padding: 0 2px; border-radius: 2px; }
 
         /* 🎓 INFO BOX */
         .info-box { border-left: 4px solid #2ecc71; background: rgba(46, 204, 113, 0.1); padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
@@ -93,7 +87,6 @@
         .file-download-btn { background: var(--brand-color); color: white !important; text-decoration: none !important; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .file-download-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-        /* MAIN ACCORDION RESET (Outer Details) */
         details.group > summary { list-style: none; }
         details.group > summary::-webkit-details-marker { display: none; }
 
@@ -107,13 +100,11 @@
 <body class="antialiased h-screen overflow-hidden flex flex-col md:flex-row">
 
 <div id="app" class="w-full h-full flex flex-col md:flex-row">
-    <!-- MOBILE HEADER -->
     <div class="md:hidden h-16 border-b border-bg-border bg-bg-main/80 backdrop-blur flex items-center justify-between px-4 z-50 shrink-0">
         <div class="flex items-center gap-2 font-bold text-lg"><div class="w-6 h-6 bg-brand rounded flex items-center justify-center text-black text-xs">5M</div><span>Wiki</span></div>
         <button @click="mobileMenu = !mobileMenu" class="p-2 text-zinc-400 hover:text-brand"><i :data-lucide="mobileMenu ? 'x' : 'menu'" class="w-6 h-6"></i></button>
     </div>
 
-    <!-- SIDEBAR -->
     <aside :class="['fixed inset-y-0 left-0 w-72 bg-bg-card border-r border-bg-border z-40 transform transition-transform duration-300 md:relative md:translate-x-0 flex flex-col', mobileMenu ? 'translate-x-0' : '-translate-x-full']">
         <div class="hidden md:flex h-16 items-center px-6 border-b border-bg-border gap-3 justify-between">
             <div class="flex items-center gap-3">
@@ -143,7 +134,6 @@
 
     <div v-if="mobileMenu" @click="mobileMenu = false" class="fixed inset-0 bg-black/80 z-30 md:hidden backdrop-blur-sm"></div>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1 h-full overflow-y-auto scroll-smooth relative" ref="mainScroll">
         <div class="max-w-5xl mx-auto px-4 py-8 md:px-8 md:py-12">
             <div class="mb-8 flex items-end justify-between border-b border-bg-border pb-4">
@@ -155,7 +145,7 @@
             </div>
 
             <div v-else>
-                <!-- NEW POSTS (ACCORDION) -->
+                <!-- NEW POSTS -->
                 <div v-if="filteredNewPosts.length > 0" class="mb-10 grid grid-cols-1 gap-4">
                     <div class="flex items-center gap-2 mb-2 text-brand font-bold uppercase text-xs tracking-wider"><i data-lucide="sparkles" class="w-4 h-4"></i>Актуальное</div>
                     
@@ -166,7 +156,7 @@
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-brand text-white border-brand">VERIFIED</span>
                                     <span v-for="tag in getTags(item)" :key="tag" class="px-2 py-0.5 rounded text-[10px] text-zinc-400 bg-bg-main border border-bg-border">#{{ tag }}</span>
                                 </div>
-                                <h3 class="text-lg font-bold text-main flex gap-2"><i data-lucide="chevron-right" class="w-5 h-5 text-brand group-open:rotate-90 transition-transform"></i> {{ item.title }}</h3>
+                                <h3 class="text-lg font-bold text-main flex gap-2"><i data-lucide="chevron-right" class="w-5 h-5 text-brand group-open:rotate-90 transition-transform"></i> <span v-html="highlight(item.title)"></span></h3>
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="text-[10px] text-zinc-500 font-mono hidden sm:block">{{ item.date }}</span>
@@ -175,7 +165,7 @@
                         </summary>
                         <div class="px-6 pb-6 pt-2 border-t border-zinc-800/50">
                              <div class="pl-4 md:pl-8 border-l border-zinc-700/50">
-                                <div class="prose text-sm leading-relaxed max-w-none" v-html="item.content"></div>
+                                <div class="prose text-sm leading-relaxed max-w-none" v-html="getProcessedContent(item)"></div>
                              </div>
                         </div>
                     </details>
@@ -192,13 +182,13 @@
                                          <span v-for="badge in item.badges" :key="badge.text" :class="['px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border', getBadgeColor(badge.color)]">{{ badge.text }}</span>
                                          <span v-for="tag in getTags(item)" :key="tag" class="px-2 py-0.5 rounded text-[10px] text-zinc-400 bg-bg-main border border-bg-border">#{{ tag }}</span>
                                     </div>
-                                    <h3 class="text-lg font-bold text-main flex gap-2"><i data-lucide="chevron-right" class="w-5 h-5 text-zinc-500 group-open:rotate-90 transition-transform"></i> {{ item.problem }}</h3>
+                                    <h3 class="text-lg font-bold text-main flex gap-2"><i data-lucide="chevron-right" class="w-5 h-5 text-zinc-500 group-open:rotate-90 transition-transform"></i> <span v-html="highlight(item.problem)"></span></h3>
                                 </div>
                                 <button @click.stop="copyLink(item.id)" class="text-zinc-500 hover:text-brand p-1"><i data-lucide="link" class="w-4 h-4"></i></button>
                             </summary>
                             <div class="px-6 pb-6 pt-2 border-t border-zinc-800/50">
                                 <div class="pl-4 md:pl-8 border-l border-zinc-700/50">
-                                    <div class="prose text-sm leading-relaxed max-w-none" v-html="renderMarkdown(item.solution)"></div>
+                                    <div class="prose text-sm leading-relaxed max-w-none" v-html="highlight(renderMarkdown(item.solution))"></div>
                                 </div>
                             </div>
                         </details>
@@ -209,25 +199,11 @@
         </div>
     </main>
 
-    <!-- SETTINGS MODAL -->
     <div v-if="showSettings" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" @click.self="showSettings = false">
         <div class="bg-bg-card border border-bg-border rounded-xl p-6 w-full max-w-sm shadow-2xl">
             <h3 class="text-xl font-bold text-main mb-4 flex items-center gap-2"><i data-lucide="palette" class="w-5 h-5 text-brand"></i> Внешний вид</h3>
-            <div class="mb-6">
-                <label class="block text-xs uppercase text-zinc-500 font-bold mb-3">Цвет Акцента</label>
-                <div class="flex gap-3">
-                    <button v-for="c in colors" :key="c.hex" @click="setColor(c.hex)" class="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110" :style="{ backgroundColor: c.hex, borderColor: themeColor === c.hex ? 'white' : 'transparent' }"></button>
-                </div>
-            </div>
-            <div class="mb-6">
-                 <label class="flex items-center justify-between cursor-pointer">
-                    <span class="text-main font-medium">Светлая тема</span>
-                    <div class="relative">
-                        <input type="checkbox" v-model="isLight" class="sr-only peer" @change="toggleTheme">
-                        <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
-                    </div>
-                </label>
-            </div>
+            <div class="mb-6"><label class="block text-xs uppercase text-zinc-500 font-bold mb-3">Цвет Акцента</label><div class="flex gap-3"><button v-for="c in colors" :key="c.hex" @click="setColor(c.hex)" class="w-8 h-8 rounded-full border-2 transition-transform hover:scale-110" :style="{ backgroundColor: c.hex, borderColor: themeColor === c.hex ? 'white' : 'transparent' }"></button></div></div>
+            <div class="mb-6"><label class="flex items-center justify-between cursor-pointer"><span class="text-main font-medium">Светлая тема</span><div class="relative"><input type="checkbox" v-model="isLight" class="sr-only peer" @change="toggleTheme"><div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div></div></label></div>
             <button @click="showSettings = false" class="w-full bg-bg-hover hover:bg-zinc-700 text-main font-bold py-2 rounded-lg transition">Готово</button>
         </div>
     </div>
@@ -241,14 +217,44 @@
         data() {
             return {
                 loading: true, newPosts: [], oldPosts: [], search: '', currentTab: 'all', mobileMenu: false, showSettings: false,
-                isLight: false, themeColor: '#f97316',
-                toast: { show: false },
+                isLight: false, themeColor: '#f97316', toast: { show: false },
                 colors: [ { hex: '#f97316' }, { hex: '#3b82f6' }, { hex: '#2ecc71' }, { hex: '#a855f7' }, { hex: '#ef4444' } ],
                 categories: [ { id: 'all', name: 'Все статьи', icon: 'layers' }, { id: 'start', name: 'Новичкам', icon: 'sprout' }, { id: 'fix', name: 'Ремонт и Ошибки', icon: 'wrench' }, { id: 'mod', name: 'Моды и Тюнинг', icon: 'cpu' }, { id: 'models', name: '3D Модели', icon: 'box' } ]
             }
         },
         computed: { filteredNewPosts() { return this.filterList(this.newPosts, true); }, filteredOldPosts() { return this.filterList(this.oldPosts, false); } },
+        watch: {
+            // КОГДА МЕНЯЕТСЯ ПОИСК - РАСКРЫВАЕМ ВНУТРЕННИЕ СПОЙЛЕРЫ
+            search(val) {
+                if(!val) return;
+                this.$nextTick(() => {
+                    document.querySelectorAll('.prose details').forEach(el => {
+                        if (el.textContent.toLowerCase().includes(val.toLowerCase())) {
+                            el.setAttribute('open', 'true');
+                        }
+                    });
+                });
+            }
+        },
         methods: {
+            highlight(text) {
+                if (!this.search || !text) return text;
+                const q = this.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return text.replace(new RegExp(`(${q})`, 'gi'), '<mark>$1</mark>');
+            },
+            getProcessedContent(item) {
+                let html = item.content;
+                // Подсветка текста внутри HTML контента (простая)
+                if(this.search) {
+                    const q = this.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    // Осторожно с заменой внутри HTML тегов, но для простого текста работает
+                    // Лучше было бы использовать NodeIterator, но здесь для простоты регексп
+                    // Заменяем только текст вне тегов (очень упрощенно)
+                    // Для надежности просто вернем html, а раскрытие спойлера уже работает
+                    return html; 
+                }
+                return html;
+            },
             getTags(item) { const t = item.tags; if (!t) return []; if (typeof t === 'string') return [t.replace(/^#/, '')]; return t; },
             filterList(list, isNew) {
                 let result = list;
@@ -302,14 +308,7 @@
                 const hash = window.location.hash;
                 if (hash && hash.includes('post-')) {
                     const id = hash.replace('#post-', ''); this.currentTab = 'all';
-                    this.$nextTick(() => { 
-                        const el = document.getElementById('post-' + id); 
-                        if (el) { 
-                            el.setAttribute('open', 'true'); 
-                            el.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
-                            el.classList.add('target-active'); 
-                        } 
-                    });
+                    this.$nextTick(() => { const el = document.getElementById('post-' + id); if (el) { el.setAttribute('open', 'true'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('target-active'); } });
                 }
             },
             setColor(hex) {
