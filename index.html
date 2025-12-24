@@ -9,6 +9,9 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- ПОДКЛЮЧИЛ FONTAWESOME (Для иконок кнопок и блоков) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
@@ -17,14 +20,8 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { 
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace']
-                    },
-                    colors: {
-                        bg: { main: '#0a0a0a', card: '#121212', border: '#262626', hover: '#1f1f1f' },
-                        brand: { DEFAULT: '#f97316', glow: 'rgba(249, 115, 22, 0.15)' }
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: { bg: { main: '#0a0a0a', card: '#121212', border: '#262626', hover: '#1f1f1f' }, brand: { DEFAULT: '#f97316', glow: 'rgba(249, 115, 22, 0.15)' } }
                 }
             }
         }
@@ -39,21 +36,36 @@
         .prose p { margin-bottom: 0.8em; }
         .prose a { color: #f97316; text-decoration: underline; }
         .prose img { border-radius: 8px; max-width: 100%; margin: 10px 0; }
+
+        /* === СТИЛИ ЦВЕТНЫХ БЛОКОВ (5M / 5X) === */
+        .printer-block { border-width: 2px; border-style: solid; padding: 20px; border-radius: 8px; margin: 20px 0; position: relative; background: #1a1a1a; }
         
+        /* Оранжевый блок (5M) */
+        .block-5m { border-color: #f97316; background: rgba(249, 115, 22, 0.05); }
+        .block-5m::before { content: '🟠 AD5M / Pro'; position: absolute; top: -12px; left: 15px; background: #f97316; color: black; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        
+        /* Синий блок (5X) */
+        .block-5x { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+        .block-5x::before { content: '🔵 AD5X / High Speed'; position: absolute; top: -12px; left: 15px; background: #3b82f6; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+
+        /* === СТИЛИ КАРТОЧКИ ФАЙЛА (ТЕМНАЯ ТЕМА) === */
         .file-card { 
             display: inline-flex; align-items: center; gap: 15px; 
-            background: #1e1e1e; border: 1px solid #333; border-left: 4px solid #f97316; 
-            padding: 10px 15px; margin: 10px 0; border-radius: 6px; 
-            width: auto; max-width: 100%;
+            background: #1e1e1e; border: 1px solid #333; border-left: 5px solid #f97316; 
+            padding: 12px 20px; margin: 10px 0; border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            color: #fff; width: auto; max-width: 100%;
         }
-        .file-name { font-weight: 600; color: #eee; font-size: 0.9em; }
-        .file-download-btn { background: #f97316; color: white; text-decoration: none !important; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
-        .file-download-btn:hover { background: #e65d00; }
+        .file-icon { color: #f97316; font-size: 24px; }
+        .file-name { font-weight: bold; font-size: 15px; color: #eee; margin-right: 15px; }
+        .file-download-btn { 
+            background: #f97316; color: white !important; text-decoration: none !important; 
+            padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; 
+            display: flex; align-items: center; gap: 5px; transition: 0.2s;
+        }
+        .file-download-btn:hover { background: #e65d00; transform: translateY(-1px); }
 
-        @keyframes target-fade {
-            0% { border-color: #f97316; box-shadow: 0 0 30px rgba(249, 115, 22, 0.3); }
-            100% { border-color: #262626; box-shadow: none; }
-        }
+        @keyframes target-fade { 0% { border-color: #f97316; box-shadow: 0 0 30px rgba(249, 115, 22, 0.3); } 100% { border-color: #262626; box-shadow: none; } }
         .target-active { animation: target-fade 2s ease-out forwards; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
@@ -63,102 +75,62 @@
 <body class="antialiased h-screen overflow-hidden flex flex-col md:flex-row">
 
 <div id="app" class="w-full h-full flex flex-col md:flex-row">
-
     <!-- МОБИЛЬНАЯ ШАПКА -->
     <div class="md:hidden h-16 border-b border-bg-border bg-bg-main/80 backdrop-blur flex items-center justify-between px-4 z-50 shrink-0">
-        <div class="flex items-center gap-2 font-bold text-lg">
-            <div class="w-6 h-6 bg-brand rounded flex items-center justify-center text-black text-xs">5M</div>
-            <span>Wiki</span>
-        </div>
-        <button @click="mobileMenu = !mobileMenu" class="p-2 text-zinc-400 hover:text-white">
-            <i :data-lucide="mobileMenu ? 'x' : 'menu'" class="w-6 h-6"></i>
-        </button>
+        <div class="flex items-center gap-2 font-bold text-lg"><div class="w-6 h-6 bg-brand rounded flex items-center justify-center text-black text-xs">5M</div><span>Wiki</span></div>
+        <button @click="mobileMenu = !mobileMenu" class="p-2 text-zinc-400 hover:text-white"><i :data-lucide="mobileMenu ? 'x' : 'menu'" class="w-6 h-6"></i></button>
     </div>
 
     <!-- САЙДБАР -->
     <aside :class="['fixed inset-y-0 left-0 w-72 bg-bg-card border-r border-bg-border z-40 transform transition-transform duration-300 md:relative md:translate-x-0 flex flex-col', mobileMenu ? 'translate-x-0' : '-translate-x-full']">
         <div class="hidden md:flex h-16 items-center px-6 border-b border-bg-border gap-3">
             <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-black font-bold shadow-[0_0_15px_rgba(249,115,22,0.4)]">5M</div>
-            <div>
-                <h1 class="font-bold leading-none">AD5M Wiki</h1>
-                <span class="text-[10px] text-zinc-500 font-mono">Community Base</span>
-            </div>
+            <div><h1 class="font-bold leading-none">AD5M Wiki</h1><span class="text-[10px] text-zinc-500 font-mono">Community Base</span></div>
         </div>
-
         <div class="p-4">
             <div class="relative group">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 group-focus-within:text-brand transition"></i>
-                <input type="text" v-model="search" placeholder="Поиск (ремень, ошибка...)" 
-                       class="w-full bg-bg-main border border-bg-border rounded-lg py-2.5 pl-10 pr-3 text-sm text-white placeholder-zinc-600 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all">
+                <input type="text" v-model="search" placeholder="Поиск (ремень, ошибка...)" class="w-full bg-bg-main border border-bg-border rounded-lg py-2.5 pl-10 pr-3 text-sm text-white placeholder-zinc-600 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all">
             </div>
         </div>
-
         <nav class="flex-1 overflow-y-auto px-3 space-y-1 py-2">
             <div v-for="cat in categories" :key="cat.id">
-                <button @click="setCategory(cat.id)"
-                    :class="['w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
-                             currentTab === cat.id 
-                             ? 'bg-brand/10 text-brand border border-brand/20' 
-                             : 'text-zinc-400 hover:bg-bg-hover hover:text-white border border-transparent']">
-                    <div class="flex items-center gap-3">
-                        <i :data-lucide="cat.icon" class="w-4 h-4"></i>
-                        {{ cat.name }}
-                    </div>
+                <button @click="setCategory(cat.id)" :class="['w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all', currentTab === cat.id ? 'bg-brand/10 text-brand border border-brand/20' : 'text-zinc-400 hover:bg-bg-hover hover:text-white border border-transparent']">
+                    <div class="flex items-center gap-3"><i :data-lucide="cat.icon" class="w-4 h-4"></i>{{ cat.name }}</div>
                     <span class="text-xs text-zinc-600 bg-bg-main px-1.5 py-0.5 rounded">{{ getCount(cat.id) }}</span>
                 </button>
             </div>
         </nav>
-        <div class="p-4 border-t border-bg-border text-xs text-zinc-600 text-center">
-            База пополняется вручную + архив чата
-        </div>
+        <div class="p-4 border-t border-bg-border text-xs text-zinc-600 text-center">База пополняется вручную + архив чата</div>
     </aside>
-
     <div v-if="mobileMenu" @click="mobileMenu = false" class="fixed inset-0 bg-black/80 z-30 md:hidden backdrop-blur-sm"></div>
 
     <!-- КОНТЕНТ -->
     <main class="flex-1 h-full overflow-y-auto scroll-smooth relative" ref="mainScroll">
         <div class="max-w-5xl mx-auto px-4 py-8 md:px-8 md:py-12">
             <div class="mb-8 flex items-end justify-between border-b border-bg-border pb-4">
-                <div>
-                    <h2 class="text-3xl font-bold text-white">{{ getCategoryName(currentTab) }}</h2>
-                    <p class="text-zinc-500 mt-1 text-sm">Всего решений: {{ filteredNewPosts.length + filteredOldPosts.length }}</p>
-                </div>
+                <div><h2 class="text-3xl font-bold text-white">{{ getCategoryName(currentTab) }}</h2><p class="text-zinc-500 mt-1 text-sm">Всего решений: {{ filteredNewPosts.length + filteredOldPosts.length }}</p></div>
             </div>
 
             <div v-if="loading" class="flex flex-col items-center justify-center py-20">
-                <div class="w-10 h-10 border-4 border-bg-border border-t-brand rounded-full animate-spin mb-4"></div>
-                <p class="text-zinc-500 animate-pulse">Загрузка базы знаний...</p>
+                <div class="w-10 h-10 border-4 border-bg-border border-t-brand rounded-full animate-spin mb-4"></div><p class="text-zinc-500 animate-pulse">Загрузка базы знаний...</p>
             </div>
 
             <div v-else>
                 <!-- НОВЫЕ ПОСТЫ -->
                 <div v-if="filteredNewPosts.length > 0" class="mb-10">
-                    <div class="flex items-center gap-2 mb-4 text-brand font-bold uppercase text-xs tracking-wider">
-                        <i data-lucide="sparkles" class="w-4 h-4"></i>
-                        Актуальные / Проверенные решения
-                    </div>
-                    
+                    <div class="flex items-center gap-2 mb-4 text-brand font-bold uppercase text-xs tracking-wider"><i data-lucide="sparkles" class="w-4 h-4"></i>Актуальные / Проверенные решения</div>
                     <div class="grid grid-cols-1 gap-6">
-                        <article v-for="item in filteredNewPosts" :key="item.id" :id="'post-' + item.id"
-                                 class="bg-bg-card border border-brand/40 shadow-[0_0_20px_rgba(249,115,22,0.05)] rounded-xl p-6 hover:border-brand transition-all duration-300 group scroll-mt-20">
-                            
+                        <article v-for="item in filteredNewPosts" :key="item.id" :id="'post-' + item.id" class="bg-bg-card border border-brand/40 shadow-[0_0_20px_rgba(249,115,22,0.05)] rounded-xl p-6 hover:border-brand transition-all duration-300 group scroll-mt-20">
                             <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
                                 <div class="flex flex-wrap gap-2">
                                     <span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border bg-brand text-black border-brand">VERIFIED</span>
-                                    
-                                    <!-- ИСПРАВЛЕННЫЙ ВЫВОД ТЕГОВ -->
-                                    <span v-for="tag in getTags(item)" :key="tag" class="px-2 py-1 rounded text-[10px] text-zinc-400 bg-bg-main border border-bg-border">
-                                        #{{ tag }}
-                                    </span>
+                                    <span v-for="tag in getTags(item)" :key="tag" class="px-2 py-1 rounded text-[10px] text-zinc-400 bg-bg-main border border-bg-border">#{{ tag }}</span>
                                 </div>
                                 <div class="text-[10px] text-zinc-500 font-mono">{{ item.date }}</div>
                                 <button @click="copyLink(item.id)" class="text-zinc-600 hover:text-brand transition p-1 opacity-0 group-hover:opacity-100"><i data-lucide="link" class="w-4 h-4"></i></button>
                             </div>
-
-                            <h3 class="text-xl font-bold text-white mb-4 leading-tight flex gap-3">
-                                <i data-lucide="check-circle-2" class="w-6 h-6 text-brand shrink-0 mt-0.5"></i>
-                                {{ item.title }}
-                            </h3>
+                            <h3 class="text-xl font-bold text-white mb-4 leading-tight flex gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand shrink-0 mt-0.5"></i>{{ item.title }}</h3>
                             <div class="pl-9 border-l border-zinc-800">
                                 <div class="prose text-zinc-300 text-sm leading-relaxed max-w-none" v-html="item.content"></div>
                             </div>
@@ -167,15 +139,13 @@
                 </div>
 
                 <div v-if="filteredNewPosts.length > 0 && filteredOldPosts.length > 0" class="relative py-8 flex items-center justify-center">
-                    <div class="absolute inset-x-0 h-px bg-bg-border"></div>
-                    <span class="relative bg-bg-main px-4 text-xs text-zinc-500 font-mono uppercase">Архив чата</span>
+                    <div class="absolute inset-x-0 h-px bg-bg-border"></div><span class="relative bg-bg-main px-4 text-xs text-zinc-500 font-mono uppercase">Архив чата</span>
                 </div>
 
                 <!-- СТАРЫЕ ПОСТЫ -->
                 <div v-if="filteredOldPosts.length > 0">
                      <div class="grid grid-cols-1 gap-6">
-                        <article v-for="item in filteredOldPosts" :key="item.id" :id="'post-' + item.id"
-                                 class="bg-bg-card border border-bg-border rounded-xl p-6 hover:border-zinc-600 transition-all duration-300 group scroll-mt-20">
+                        <article v-for="item in filteredOldPosts" :key="item.id" :id="'post-' + item.id" class="bg-bg-card border border-bg-border rounded-xl p-6 hover:border-zinc-600 transition-all duration-300 group scroll-mt-20">
                             <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
                                 <div class="flex flex-wrap gap-2">
                                     <span v-for="badge in item.badges" :key="badge.text" :class="['px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border', getBadgeColor(badge.color)]">{{ badge.text }}</span>
@@ -183,10 +153,7 @@
                                 </div>
                                 <button @click="copyLink(item.id)" class="text-zinc-600 hover:text-brand transition p-1 opacity-0 group-hover:opacity-100"><i data-lucide="link" class="w-4 h-4"></i></button>
                             </div>
-                            <h3 class="text-xl font-bold text-white mb-4 leading-tight flex gap-3">
-                                <i data-lucide="help-circle" class="w-6 h-6 text-zinc-600 shrink-0 mt-0.5"></i>
-                                {{ item.problem }}
-                            </h3>
+                            <h3 class="text-xl font-bold text-white mb-4 leading-tight flex gap-3"><i data-lucide="help-circle" class="w-6 h-6 text-zinc-600 shrink-0 mt-0.5"></i>{{ item.problem }}</h3>
                             <div class="pl-9 relative">
                                 <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-bg-border"></div>
                                 <div class="prose text-zinc-300 text-sm leading-relaxed max-w-none" v-html="renderMarkdown(item.solution)"></div>
@@ -194,63 +161,32 @@
                         </article>
                     </div>
                 </div>
-            
-                <div v-if="filteredNewPosts.length === 0 && filteredOldPosts.length === 0" class="text-center py-20 border border-dashed border-bg-border rounded-xl bg-bg-card/50">
-                    <i data-lucide="search-x" class="w-12 h-12 text-zinc-700 mx-auto mb-4"></i>
-                    <h3 class="text-lg font-medium text-zinc-300">Ничего не найдено</h3>
-                </div>
+                <div v-if="filteredNewPosts.length === 0 && filteredOldPosts.length === 0" class="text-center py-20 border border-dashed border-bg-border rounded-xl bg-bg-card/50"><i data-lucide="search-x" class="w-12 h-12 text-zinc-700 mx-auto mb-4"></i><h3 class="text-lg font-medium text-zinc-300">Ничего не найдено</h3></div>
             </div>
             <div class="h-12"></div>
         </div>
     </main>
 
-    <div v-show="toast.show" class="fixed bottom-6 right-6 z-50 bg-brand text-black font-bold px-4 py-3 rounded-lg shadow-[0_0_20px_rgba(249,115,22,0.4)] flex items-center gap-3 animate-bounce">
-        <i data-lucide="check" class="w-5 h-5"></i> Ссылка скопирована!
-    </div>
+    <div v-show="toast.show" class="fixed bottom-6 right-6 z-50 bg-brand text-black font-bold px-4 py-3 rounded-lg shadow-[0_0_20px_rgba(249,115,22,0.4)] flex items-center gap-3 animate-bounce"><i data-lucide="check" class="w-5 h-5"></i> Ссылка скопирована!</div>
 </div>
 
 <script>
     const { createApp } = Vue;
-
     createApp({
         data() {
             return {
-                loading: true,
-                newPosts: [],
-                oldPosts: [],
-                search: '',
-                currentTab: 'all',
-                mobileMenu: false,
-                toast: { show: false },
-                categories: [
-                    { id: 'all', name: 'Все статьи', icon: 'layers' },
-                    { id: 'start', name: 'Новичкам', icon: 'sprout' },
-                    { id: 'fix', name: 'Ремонт и Ошибки', icon: 'wrench' },
-                    { id: 'mod', name: 'Моды и Тюнинг', icon: 'cpu' },
-                    { id: 'models', name: '3D Модели', icon: 'box' }
-                ]
+                loading: true, newPosts: [], oldPosts: [], search: '', currentTab: 'all', mobileMenu: false, toast: { show: false },
+                categories: [ { id: 'all', name: 'Все статьи', icon: 'layers' }, { id: 'start', name: 'Новичкам', icon: 'sprout' }, { id: 'fix', name: 'Ремонт и Ошибки', icon: 'wrench' }, { id: 'mod', name: 'Моды и Тюнинг', icon: 'cpu' }, { id: 'models', name: '3D Модели', icon: 'box' } ]
             }
         },
-        computed: {
-            filteredNewPosts() { return this.filterList(this.newPosts, true); },
-            filteredOldPosts() { return this.filterList(this.oldPosts, false); }
-        },
+        computed: { filteredNewPosts() { return this.filterList(this.newPosts, true); }, filteredOldPosts() { return this.filterList(this.oldPosts, false); } },
         methods: {
-            // === ХЕЛПЕР ДЛЯ ТЕГОВ (Лечит баг с #M #o #d) ===
-            getTags(item) {
-                const t = item.tags;
-                if (!t) return [];
-                // Если тег сохранен как строка (старый баг) - делаем массив
-                if (typeof t === 'string') return [t.replace(/^#/, '')]; 
-                return t;
-            },
-
+            getTags(item) { const t = item.tags; if (!t) return []; if (typeof t === 'string') return [t.replace(/^#/, '')]; return t; },
             filterList(list, isNew) {
                 let result = list;
                 if (this.currentTab !== 'all') {
                     result = result.filter(item => {
                         if (isNew) {
-                            // Фильтр для новых постов по тегам
                             const tags = Array.isArray(item.tags) ? item.tags.join(' ').toLowerCase() : (item.tags || '').toLowerCase();
                             if (this.currentTab === 'mod' && (tags.includes('mod') || tags.includes('upgrade'))) return true;
                             if (this.currentTab === 'fix' && (tags.includes('fix') || tags.includes('error'))) return true;
@@ -270,58 +206,35 @@
                     result = result.filter(a => {
                         const title = isNew ? a.title : a.problem;
                         const content = isNew ? a.content : a.solution;
-                        // Безопасное получение тегов для поиска
                         const tags = Array.isArray(a.tags) ? a.tags.join(' ') : (a.tags || '');
-                        return (title && title.toLowerCase().includes(q)) || 
-                               (content && content.toLowerCase().includes(q)) ||
-                               (tags && tags.toLowerCase().includes(q));
+                        return (title && title.toLowerCase().includes(q)) || (content && content.toLowerCase().includes(q)) || (tags && tags.toLowerCase().includes(q));
                     });
                 }
                 return result;
             },
-
             async loadData() {
                 try {
-                    // ДОБАВИЛ ?v=timestamp ЧТОБЫ ИЗБЕЖАТЬ КЭША
                     const ts = Date.now();
-                    try {
-                        const oldRes = await fetch('db.json?v=' + ts);
-                        if (oldRes.ok) this.oldPosts = await oldRes.json();
-                    } catch(e) {}
-                    try {
-                        const newRes = await fetch('new_posts.json?v=' + ts);
-                        if (newRes.ok) this.newPosts = await newRes.json();
-                    } catch(e) {}
-
+                    try { const oldRes = await fetch('db.json?v=' + ts); if (oldRes.ok) this.oldPosts = await oldRes.json(); } catch(e) {}
+                    try { const newRes = await fetch('new_posts.json?v=' + ts); if (newRes.ok) this.newPosts = await newRes.json(); } catch(e) {}
                     this.$nextTick(() => { this.checkHash(); lucide.createIcons(); });
-                } catch (e) { console.error(e); } 
-                finally { this.loading = false; }
+                } catch (e) { console.error(e); } finally { this.loading = false; }
             },
-            
             renderMarkdown(text) { return text ? marked.parse(text) : ''; },
             setCategory(id) { this.currentTab = id; this.mobileMenu = false; this.$refs.mainScroll.scrollTop = 0; },
             getCategoryName(id) { const cat = this.categories.find(c => c.id === id); return cat ? cat.name : 'База знаний'; },
             getCount(id) { if (id === 'all') return this.newPosts.length + this.oldPosts.length; return 'Auto'; },
-            getBadgeColor(color) {
-                const map = { 'blue': 'bg-blue-500/10 text-blue-400 border-blue-500/20', 'purple': 'bg-purple-500/10 text-purple-400 border-purple-500/20', 'orange': 'bg-orange-500/10 text-orange-400 border-orange-500/20', 'red': 'bg-red-500/10 text-red-400 border-red-500/20', 'green': 'bg-green-500/10 text-green-400 border-green-500/20' };
-                return map[color] || 'bg-zinc-800 text-zinc-400 border-zinc-700';
-            },
+            getBadgeColor(color) { const map = { 'blue': 'bg-blue-500/10 text-blue-400 border-blue-500/20', 'purple': 'bg-purple-500/10 text-purple-400 border-purple-500/20', 'orange': 'bg-orange-500/10 text-orange-400 border-orange-500/20', 'red': 'bg-red-500/10 text-red-400 border-red-500/20', 'green': 'bg-green-500/10 text-green-400 border-green-500/20' }; return map[color] || 'bg-zinc-800 text-zinc-400 border-zinc-700'; },
             copyLink(id) {
                 const url = `${window.location.origin}${window.location.pathname}#post-${id}`;
-                navigator.clipboard.writeText(url);
-                history.pushState(null, null, `#post-${id}`);
-                this.toast.show = true;
-                setTimeout(() => this.toast.show = false, 2000);
+                navigator.clipboard.writeText(url); history.pushState(null, null, `#post-${id}`);
+                this.toast.show = true; setTimeout(() => this.toast.show = false, 2000);
             },
             checkHash() {
                 const hash = window.location.hash;
                 if (hash && hash.includes('post-')) {
-                    const id = hash.replace('#post-', '');
-                    this.currentTab = 'all';
-                    this.$nextTick(() => {
-                        const el = document.getElementById('post-' + id);
-                        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('target-active'); }
-                    });
+                    const id = hash.replace('#post-', ''); this.currentTab = 'all';
+                    this.$nextTick(() => { const el = document.getElementById('post-' + id); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('target-active'); } });
                 }
             }
         },
