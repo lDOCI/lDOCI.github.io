@@ -57,27 +57,20 @@
         .prose a { color: var(--brand-color); text-decoration: underline; }
         .prose img { border-radius: 8px; max-width: 100%; margin: 10px 0; }
 
-        /* === СПОЙЛЕРЫ (Исправлено) === */
         .prose details { border: 1px solid var(--bg-border); border-radius: 8px; margin: 15px 0; overflow: hidden; background: var(--bg-card); }
         .prose summary { cursor: pointer; font-weight: bold; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; user-select: none; }
         .prose summary::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 12px; transition: 0.3s; }
         .prose details[open] summary::after { transform: rotate(180deg); }
         .prose .details-content { padding: 15px; border-top: 1px solid var(--bg-border); }
 
-        /* 🟠 5M */
         .prose details.block-5m { border: 2px solid #f97316; }
         .prose details.block-5m summary { background: #f97316; color: white; }
-        .prose details.block-5m summary:hover { background: #e67e22; }
         
-        /* 🔵 5X */
         .prose details.block-5x { border: 2px solid #3b82f6; }
         .prose details.block-5x summary { background: #3b82f6; color: white; }
-        .prose details.block-5x summary:hover { background: #2563eb; }
 
-        /* ПОДСВЕТКА ПОИСКА */
         mark { background-color: #facc15; color: black; padding: 0 2px; border-radius: 2px; font-weight: bold; }
 
-        /* 🎓 INFO BOX */
         .info-box { border-left: 4px solid #2ecc71; background: rgba(46, 204, 113, 0.1); padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
         .info-box::before { content: '🎓 ПОЛЕЗНО ЗНАТЬ:'; display: block; font-weight: bold; color: #2ecc71; margin-bottom: 5px; font-size: 12px; letter-spacing: 1px; }
 
@@ -85,28 +78,35 @@
         .file-icon { color: var(--brand-color); font-size: 24px; }
         .file-name { font-weight: bold; font-size: 15px; margin-right: 15px; }
         .file-download-btn { background: var(--brand-color); color: white !important; text-decoration: none !important; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-        .file-download-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-        details.group > summary { list-style: none; }
-        details.group > summary::-webkit-details-marker { display: none; }
 
         @keyframes target-fade { 0% { border-color: var(--brand-color); box-shadow: 0 0 30px var(--brand-glow); } 100% { border-color: var(--bg-border); box-shadow: none; } }
         .target-active { animation: target-fade 2s ease-out forwards; open: true; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
     </style>
 </head>
 <body class="antialiased h-screen overflow-hidden flex flex-col md:flex-row">
 
 <div id="app" class="w-full h-full flex flex-col md:flex-row">
-    <!-- MOBILE HEADER -->
-    <div class="md:hidden h-16 border-b border-bg-border bg-bg-main/80 backdrop-blur flex items-center justify-between px-4 z-50 shrink-0">
-        <div class="flex items-center gap-2 font-bold text-lg"><div class="w-6 h-6 bg-brand rounded flex items-center justify-center text-black text-xs">5M</div><span>Wiki</span></div>
-        <button @click="mobileMenu = !mobileMenu" class="p-2 text-zinc-400 hover:text-brand"><i :data-lucide="mobileMenu ? 'x' : 'menu'" class="w-6 h-6"></i></button>
+    
+    <!-- MOBILE HEADER (С ПОИСКОМ) -->
+    <div class="md:hidden h-16 border-b border-bg-border bg-bg-main/80 backdrop-blur flex items-center gap-3 px-4 z-50 shrink-0">
+        <button @click="mobileMenu = !mobileMenu" class="p-2 -ml-2 text-zinc-400 hover:text-brand transition">
+            <i :data-lucide="mobileMenu ? 'x' : 'menu'" class="w-6 h-6"></i>
+        </button>
+        
+        <div class="flex-1 relative">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4"></i>
+            <input type="text" v-model="search" placeholder="Поиск решений..." 
+                   class="w-full bg-bg-card border border-bg-border rounded-lg py-1.5 pl-9 pr-3 text-sm text-main placeholder-zinc-500 focus:border-brand outline-none transition-all">
+        </div>
+
+        <button @click="showSettings = true" class="p-2 text-zinc-500 hover:text-brand">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
     </div>
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR (ДЕСКТОП) -->
     <aside :class="['fixed inset-y-0 left-0 w-72 bg-bg-card border-r border-bg-border z-40 transform transition-transform duration-300 md:relative md:translate-x-0 flex flex-col', mobileMenu ? 'translate-x-0' : '-translate-x-full']">
         <div class="hidden md:flex h-16 items-center px-6 border-b border-bg-border gap-3 justify-between">
             <div class="flex items-center gap-3">
@@ -116,7 +116,8 @@
             <button @click="showSettings = true" class="text-zinc-500 hover:text-brand transition"><i data-lucide="settings" class="w-5 h-5"></i></button>
         </div>
         
-        <div class="p-4">
+        <!-- Поиск в сайдбаре (скрыт на мобилках, так как он теперь в шапке) -->
+        <div class="p-4 hidden md:block">
             <div class="relative group">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4 group-focus-within:text-brand transition"></i>
                 <input type="text" v-model="search" placeholder="Поиск..." class="w-full bg-bg-main border border-bg-border rounded-lg py-2.5 pl-10 pr-3 text-sm text-main placeholder-zinc-600 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-all">
@@ -140,11 +141,14 @@
     <main class="flex-1 h-full overflow-y-auto scroll-smooth relative" ref="mainScroll">
         <div class="max-w-5xl mx-auto px-4 py-8 md:px-8 md:py-12">
             <div class="mb-8 flex items-end justify-between border-b border-bg-border pb-4">
-                <div><h2 class="text-3xl font-bold text-main">{{ getCategoryName(currentTab) }}</h2><p class="text-zinc-500 mt-1 text-sm">Решений: {{ filteredNewPosts.length + filteredOldPosts.length }}</p></div>
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-main">{{ getCategoryName(currentTab) }}</h2>
+                    <p class="text-zinc-500 mt-1 text-sm">Найдено решений: {{ filteredNewPosts.length + filteredOldPosts.length }}</p>
+                </div>
             </div>
 
             <div v-if="loading" class="flex flex-col items-center justify-center py-20">
-                <div class="w-10 h-10 border-4 border-bg-border border-t-brand rounded-full animate-spin mb-4"></div><p class="text-zinc-500 animate-pulse">Загрузка...</p>
+                <div class="w-10 h-10 border-4 border-bg-border border-t-brand rounded-full animate-spin mb-4"></div><p class="text-zinc-500 animate-pulse">Загрузка базы...</p>
             </div>
 
             <div v-else>
@@ -168,7 +172,6 @@
                         </summary>
                         <div class="px-6 pb-6 pt-2 border-t border-zinc-800/50">
                              <div class="pl-4 md:pl-8 border-l border-zinc-700/50">
-                                <!-- v-html с функцией highlight -->
                                 <div class="prose text-sm leading-relaxed max-w-none" v-html="highlightContent(item.content)"></div>
                              </div>
                         </div>
@@ -203,6 +206,7 @@
         </div>
     </main>
 
+    <!-- SETTINGS MODAL -->
     <div v-if="showSettings" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" @click.self="showSettings = false">
         <div class="bg-bg-card border border-bg-border rounded-xl p-6 w-full max-w-sm shadow-2xl">
             <h3 class="text-xl font-bold text-main mb-4 flex items-center gap-2"><i data-lucide="palette" class="w-5 h-5 text-brand"></i> Внешний вид</h3>
@@ -226,29 +230,24 @@
                 categories: [ { id: 'all', name: 'Все статьи', icon: 'layers' }, { id: 'start', name: 'Новичкам', icon: 'sprout' }, { id: 'fix', name: 'Ремонт и Ошибки', icon: 'wrench' }, { id: 'mod', name: 'Моды и Тюнинг', icon: 'cpu' }, { id: 'models', name: '3D Модели', icon: 'box' } ]
             }
         },
-        computed: { filteredNewPosts() { return this.filterList(this.newPosts, true); }, filteredOldPosts() { return this.filterList(this.oldPosts, false); } },
+        computed: { 
+            filteredNewPosts() { return this.filterList(this.newPosts, true); }, 
+            filteredOldPosts() { return this.filterList(this.oldPosts, false); } 
+        },
         watch: {
-            // АГРЕССИВНОЕ РАСКРЫТИЕ ПРИ ПОИСКЕ
             search(val) {
-                if(!val) {
-                    // При очистке поиска можно закрыть, но лучше оставить как есть
-                    return;
-                }
+                if(!val) return;
                 this.$nextTick(() => {
                     const q = val.toLowerCase();
-                    // 1. Ищем главные статьи
                     document.querySelectorAll('details.group').forEach(el => {
                         const content = el.textContent.toLowerCase();
                         if (content.includes(q)) {
                             el.setAttribute('open', 'true');
                         }
-                        
-                        // 2. Ищем ВНУТРЕННИЕ спойлеры (details внутри details)
                         const innerDetails = el.querySelectorAll('.prose details');
                         innerDetails.forEach(inner => {
                             if (inner.textContent.toLowerCase().includes(q)) {
                                 inner.setAttribute('open', 'true');
-                                // И обязательно открываем родительскую статью, если она закрыта
                                 el.setAttribute('open', 'true');
                             }
                         });
@@ -257,25 +256,17 @@
             }
         },
         methods: {
-            // Подсветка для простого текста (заголовки)
             highlight(text) {
                 if (!this.search || !text) return text;
                 const q = this.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 return text.replace(new RegExp(`(${q})`, 'gi'), '<mark>$1</mark>');
             },
-            
-            // УМНАЯ ПОДСВЕТКА ДЛЯ HTML (чтобы не ломать теги)
             highlightContent(htmlContent) {
                 if (!this.search || !htmlContent) return htmlContent;
-                
                 const q = this.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                // Эта регулярка ищет текст ТОЛЬКО если он не находится внутри скобок <>
-                // (?![^<]*>) - negative lookahead: удостоверяемся, что дальше нет закрывающей скобки без открывающей перед ней
                 const regex = new RegExp(`(${q})(?![^<]*>)`, 'gi');
-                
                 return htmlContent.replace(regex, '<mark>$1</mark>');
             },
-
             getTags(item) { const t = item.tags; if (!t) return []; if (typeof t === 'string') return [t.replace(/^#/, '')]; return t; },
             filterList(list, isNew) {
                 let result = list;
@@ -318,7 +309,10 @@
             renderMarkdown(text) { return text ? marked.parse(text) : ''; },
             setCategory(id) { this.currentTab = id; this.mobileMenu = false; this.$refs.mainScroll.scrollTop = 0; },
             getCategoryName(id) { const cat = this.categories.find(c => c.id === id); return cat ? cat.name : 'База знаний'; },
-            getCount(id) { if (id === 'all') return this.newPosts.length + this.oldPosts.length; return 'Auto'; },
+            getCount(id) { 
+                if (id === 'all') return this.newPosts.length + this.oldPosts.length;
+                return this.filterList([...this.newPosts, ...this.oldPosts], true).length;
+            },
             getBadgeColor(color) { const map = { 'blue': 'bg-blue-500/10 text-blue-400 border-blue-500/20', 'purple': 'bg-purple-500/10 text-purple-400 border-purple-500/20', 'orange': 'bg-orange-500/10 text-orange-400 border-orange-500/20', 'red': 'bg-red-500/10 text-red-400 border-red-500/20', 'green': 'bg-green-500/10 text-green-400 border-green-500/20' }; return map[color] || 'bg-zinc-800 text-zinc-400 border-zinc-700'; },
             copyLink(id) {
                 const url = `${window.location.origin}${window.location.pathname}#post-${id}`;
