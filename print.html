@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Решение проблем качества печати | AD5M Wiki</title>
+    <style>
+        :root {
+            --primary: #1976d2;
+            --text-main: #333;
+            --bg-body: #f4f7f9;
+            --bg-card: #ffffff;
+            --sidebar-width: 320px;
+            --border: #e0e6ed;
+            --header-h: 60px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* МОБИЛЬНАЯ ШАПКА */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--header-h);
+            background: var(--primary);
+            color: white;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .menu-btn {
+            background: none; border: none; color: white;
+            font-size: 24px; cursor: pointer; margin-right: 10px;
+        }
+
+        .mobile-search {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        /* БОКОВАЯ ПАНЕЛЬ */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #fff;
+            border-right: 1px solid var(--border);
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            z-index: 500;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .sidebar-header h2 { font-size: 18px; margin: 0 0 15px 0; color: var(--primary); }
+        .desktop-search { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; outline: none; }
+
+        .nav-menu { overflow-y: auto; flex: 1; padding: 10px 0; }
+        .nav-item {
+            display: block; padding: 10px 20px; text-decoration: none;
+            color: #666; font-size: 13px; border-left: 3px solid transparent;
+        }
+        .nav-item:hover { background: #f0f4f8; color: var(--primary); }
+        .nav-item.active { background: #e3f2fd; color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
+
+        /* КОНТЕНТ */
+        .content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; max-width: 1000px; }
+        .page-title { font-size: 32px; font-weight: 800; margin-bottom: 40px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
+        
+        section { background: var(--bg-card); border-radius: 12px; padding: 40px; margin-bottom: 50px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        h2 { font-size: 24px; margin-top: 0; margin-bottom: 25px; color: #111; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        h4 { font-size: 19px; margin: 35px 0 15px 0; color: #111; font-weight: bold; }
+
+        .solution-block { background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid var(--border); }
+        .solution-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; display: block; }
+
+        img { max-width: 100%; height: auto; border-radius: 4px; margin: 20px 0; display: block; }
+        
+        .path-highlight { background: #e3f2fd; padding: 2px 6px; border-radius: 4px; font-weight: 600; color: #0d47a1; }
+        
+        footer { margin-top: 60px; text-align: center; color: #999; font-size: 13px; padding: 40px; border-top: 1px solid var(--border); }
+
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 1000px) {
+            .mobile-header { display: flex; }
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); box-shadow: 5px 0 15px rgba(0,0,0,0.1); }
+            .content { margin-left: 0; padding: 80px 20px 20px 20px; }
+            .sidebar-header { display: none; }
+        }
+
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 400;
+        }
+        .overlay.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <input type="text" class="mobile-search" placeholder="Поиск по wiki..." oninput="syncSearch(this.value)">
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Flashforge Wiki RU</h2>
+            <input type="text" class="desktop-search" placeholder="Поиск по словам..." oninput="syncSearch(this.value)">
+        </div>
+        <nav class="nav-menu">
+            <a href="#h1" class="nav-item" onclick="toggleMenu()">1. Недоэкструзия</a>
+            <a href="#h2" class="nav-item" onclick="toggleMenu()">2. Линии слоев</a>
+            <a href="#h3" class="nav-item" onclick="toggleMenu()">3. Гостинг и звон</a>
+            <a href="#h4" class="nav-item" onclick="toggleMenu()">4. Провисание нависаний</a>
+            <a href="#h5" class="nav-item" onclick="toggleMenu()">5. Паутина (Stringing)</a>
+            <a href="#h6" class="nav-item" onclick="toggleMenu()">6. Шероховатость (FlashPrint)</a>
+            <a href="#h7" class="nav-item" onclick="toggleMenu()">7. Зазоры заполнения</a>
+            <a href="#h8" class="nav-item" onclick="toggleMenu()">8. Перегрев</a>
+            <a href="#h9" class="nav-item" onclick="toggleMenu()">9. Слабое заполнение</a>
+            <a href="#h10" class="nav-item" onclick="toggleMenu()">10. Волосение</a>
+            <a href="#h11" class="nav-item" onclick="toggleMenu()">11. Расслоение</a>
+            <a href="#h12" class="nav-item" onclick="toggleMenu()">12. Смещение слоев</a>
+            <a href="#h13" class="nav-item" onclick="toggleMenu()">13. Деформация (Warping)</a>
+            <a href="#h14" class="nav-item" onclick="toggleMenu()">14. Мелкие детали</a>
+            <a href="#h15" class="nav-item" onclick="toggleMenu()">15. Гостинг / Звон</a>
+            <a href="#h16" class="nav-item" onclick="toggleMenu()">16. Поверхность над поддержкой</a>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <h1 class="page-title">Проблемы качества печати</h1>
+
+        <!-- 1 -->
+        <section id="h1" class="searchable">
+            <h2>1. Недоэкструзия во время печати</h2>
+            <img src="./problems/1.under_extrusion_during_printing.png">
+            <p><strong>Причина 1:</strong> Примеси в филаменте или несоответствие между температурой печати модели и температурой филамента.</p>
+            <div class="solution-block">
+                <span class="solution-title">Решение:</span>
+                <ol>
+                    <li>Замените филамент на новый.</li>
+                    <li>Установите правильную температуру печати на основе рекомендаций, указанных на катушке.</li>
+                </ol>
+            </div>
+            <p><strong>Причина 2:</strong> Закоксовывание (нагар) филамента на сопле.</p>
+            <p><strong>Проблема:</strong> При ручной подаче филамента диаметр выходящей нити меньше 0.45 мм. Норма: 0.5 ± 0.03 мм.</p>
+            <div class="solution-block">
+                <span class="solution-title">Решение:</span>
+                <p>Замените сопло.</p>
+            </div>
+        </section>
+
+        <!-- 2 -->
+        <section id="h2" class="searchable">
+            <h2>2. Линии слоев на 3D-принтах</h2>
+            <img src="./problems/2-1.layer_lines_on_3d_prints.png">
+            <p><strong>Причина 1:</strong> Движение по оси Z происходит не плавно.</p>
+            <p><strong>Проблема:</strong> Аномальный шум или заклинивание при движении оси Z вверх-вниз.</p>
+            <div class="solution-block">
+                <span class="solution-title">Решение: Нанесите смазку на ходовой винт оси Z.</span>
+                <p>• <strong>Шаг 1:</strong> Подготовьте смазку и выполните Home XYZ.</p>
+                <img src="./problems/2-2.layer_lines_on_3d_prints.png">
+                <img src="./problems/回零.png">
+                <p>• <strong>Шаг 2:</strong> Нанесите смазку на ходовой винт оси Z, обеспечив равномерное покрытие.</p>
+                <img src="./problems/油上.jpg">
+                <p>• <strong>Шаг 3:</strong> Нажмите, чтобы поднять стол (выберите "100", нажав дважды).</p>
+                <img src="./problems/100site2.png">
+                <p>• <strong>Шаг 4:</strong> Нанесите смазку под стол.</p>
+                <img src="./problems/油下.jpg">
+                <p>• <strong>Шаг 5:</strong> Нажмите кнопку Home для распределения смазки по винту.</p>
+                <img src="./problems/100site.png">
+                <img src="./problems/润滑ok.jpg">
+            </div>
+        </section>
+
+        <!-- 3 -->
+        <section id="h3" class="searchable">
+            <h2>3. Гостинг (Эхо) и Звон (Ringing)</h2>
+            <img src="./problems/3-1.ghosting&ringing.png">
+            <p><strong>Причина 1:</strong> Недостаточное натяжение ремней.</p>
+            <div class="solution-block">
+                <span class="solution-title">Решение 1:</span>
+                <p>• Шаг 1: Подтяните ремни.<br>• Шаг 2: Снова выполните калибровку и компенсацию вибраций (Vibration Compensation).</p>
+            </div>
+            <div class="solution-block">
+                <span class="solution-title">Решение 2:</span>
+                <p>Снизьте ускорение в Orca через: <span class="path-highlight">Speed → Acceleration → Normal printing (Скорость → Ускорение → Обычная печать)</span>.</p>
+                <img src="./problems/加速度.png">
+            </div>
+        </section>
+
+        <!-- 4 -->
+        <section id="h4" class="searchable">
+            <h2>4. Провисание нависаний (Droopy Overhangs)</h2>
+            <img src="./problems/4-1.droopy_overhangs.png">
+            <div class="solution-block">
+                <span class="solution-title">Причина 1: Нависания под слишком большими углами.</span>
+                <p>1. Включите <strong>“Slow down for overhangs” (Замедление на нависаниях)</strong> в Orca.</p>
+                <img src="./problems/悬垂降速.png">
+                <p>2. Добавьте поддержки для нависаний с углом более 30°.</p>
+                <p>3. Увеличьте время обдува слоя и снизьте скорость в Orca: <span class="path-highlight">Cooling (Охлаждение)</span>.</p>
+                <img src="./problems/冷却.png">
+            </div>
+            <p><strong>Причина 2:</strong> Неисправность вентилятора охлаждения. Обратитесь к видео по замене турбо-вентилятора.</p>
+        </section>
+
+        <!-- 5 -->
+        <section id="h5" class="searchable">
+            <h2>5. Паутина (Stringing)</h2>
+            <img src="./problems/5-1.stringing.png">
+            <p><strong>Причина 1:</strong> Влажный филамент (PLA, PETG, PLA-CF).</p>
+            <div class="solution-block">
+                <span class="solution-title">Решение:</span>
+                <p>Просушите филамент. Причина 2: Малый откат. Увеличьте дистанцию и скорость в Orca: <span class="path-highlight">Extruder → Retraction (Экструдер → Откат)</span>.</p>
+                <img src="./problems/回抽设置.png">
+            </div>
+        </section>
+
+        <!-- 6 -->
+        <section id="h6" class="searchable">
+            <h2>6. Шероховатость в малых зонах (FlashPrint 5)</h2>
+            <img src="./problems/6-1._for_models_sliced_by_flashprint_5.png">
+            <div class="solution-block">
+                <span class="solution-title">Решение:</span>
+                <p>Отрегулируйте <span class="path-highlight">“Max fan speed threshold” (Порог макс. скорости обдува)</span>, чтобы принтер замедлялся на мелких слоях.</p>
+                <img src="./problems/冷却降速.png">
+            </div>
+        </section>
+
+        <!-- 7 -->
+        <section id="h7" class="searchable">
+            <h2>7. Зазоры между заполнением и контуром</h2>
+            <img src="./problems/ty1.png" width="550">
+            <p>Необходим нахлест заполнения на стенки. В Orca: <span class="path-highlight">Process → Strength → Top/Bottom solid infill/wall overlap (Перекрытие заполнения и стенок)</span>. Поставьте 25%.</p>
+            <img src="./problems/t2.png">
+            <p>Снизьте скорость для <span class="path-highlight">Top surface (Верхняя поверхность)</span>.</p>
+            <img src="./problems/t3.png">
+        </section>
+
+        <!-- 8 -->
+        <section id="h8" class="searchable">
+            <h2>8. Перегрев</h2>
+            <img src="./problems/t4.png" width="550">
+            <div class="solution-block">
+                <span class="solution-title">Меры:</span>
+                <p>Увеличьте <span class="path-highlight">Layer cooling time (Время охлаждения слоя)</span> в <span class="path-highlight">Material settings → Cooling (Настройки материала → Охлаждение)</span>.</p>
+                <img src="./problems/t5.png">
+                <p>Снизьте температуру на 5-10°C или уменьшите <span class="path-highlight">Max volumetric speed (Макс. объемная скорость)</span>.</p>
+                <img src="./problems/t6.png">
+                <img src="./problems/t7.png">
+            </div>
+        </section>
+
+        <!-- 9 -->
+        <section id="h9" class="searchable">
+            <h2>9. Слабое заполнение / Недоэкструзия</h2>
+            <img src="./problems/t8.png" width="550">
+            <p>Проверьте износ сопла. Повысьте температуру или снизьте скорость в Orca: <span class="path-highlight">Speed (Скорость)</span>.</p>
+            <img src="./problems/t9.png">
+        </section>
+
+        <!-- 10 -->
+        <section id="h10" class="searchable">
+            <h2>10. Волосение (Stringing)</h2>
+            <img src="./problems/t10.png" width="550">
+            <p>Просушите нить. Снизьте скорость печати и температуру сопла.</p>
+            <img src="./problems/t11.png">
+            <img src="./problems/t12.png">
+        </section>
+
+        <!-- 11 -->
+        <section id="h11" class="searchable">
+            <h2>11. Расслоение и трещины слоев</h2>
+            <img src="./problems/t13.png" width="550">
+            <p>Снизьте обдув. Повысьте температуру. Уменьшите <span class="path-highlight">Max volumetric speed</span>.</p>
+            <img src="./problems/t14.png">
+            <img src="./problems/t15.png">
+        </section>
+
+        <!-- 12 -->
+        <section id="h12" class="searchable">
+            <h2>12. Смещение слоев (Layer Shifting)</h2>
+            <img src="./problems/t16.png" width="550">
+            <p>Устраните столкновение сопла с моделью. Снизьте скорость или ускорение.</p>
+            <img src="./problems/t17.png">
+        </section>
+
+        <!-- 13 -->
+        <section id="h13" class="searchable">
+            <h2>13. Деформация (Warping)</h2>
+            <img src="./problems/t18.png" width="550">
+            <p>Очистите стол. Поднимите температуру стола. Снизьте скорость первого слоя.</p>
+            <img src="./problems/t19.png">
+        </section>
+
+        <!-- 14 -->
+        <section id="h14" class="searchable">
+            <h2>14. Мелкие детали</h2>
+            <img src="./problems/t20.png" width="550">
+            <p>Уменьшите <span class="path-highlight">Extrusion Width (Ширина экструзии)</span>. Включите <strong>Arachne</strong> в <span class="path-highlight">Wall generator</span>.</p>
+            <img src="./problems/t21.png">
+            <img src="./problems/t22.png">
+        </section>
+
+        <!-- 15 -->
+        <section id="h15" class="searchable">
+            <h2>15. Гостинг / Звон (Ghosting/Ringing)</h2>
+            <img src="./problems/t23.png" width="550">
+            <p>Отрегулируйте натяжение ремней. Снизьте ускорения. Выполните калибровку Input Shaper.</p>
+            <img src="./problems/t24.png">
+        </section>
+
+        <!-- 16 -->
+        <section id="h16" class="searchable">
+            <h2>16. Плохая поверхность над поддержками</h2>
+            <img src="./problems/t25.png" width="550">
+            
+            <h4>Возможные причины и решения</h4>
+            
+            <p><strong>Слишком большой зазор поддержек (Support Spacing Too Large)</strong></p>
+            <p>Зазор поддержек — это параметр, контролирующий расстояние между структурами поддержки и моделью. Если он установлен слишком большим, это приведет к провисанию нависаний. Вы можете соответствующим образом уменьшить это значение, но не делайте его слишком маленьким, чтобы поддержки не стали трудноудаляемыми.</p>
+            <img src="./problems/t26.png">
+            
+            <p><strong>Слишком быстрая печать (Printing Too Fast)</strong></p>
+            <p>Даже с поддержками слишком быстрая печать может привести к провисанию нависаний. Соответствующая настройка параметров скорости для нависающих элементов поможет улучшить результат.</p>
+            <img src="./problems/t27.png">
+        </section>
+
+        <footer>
+            Создано на основе справочных материалов wiki.flashforge.com<br>
+Перевод и адаптация I_DOC_I
+        </footer>
+    </main>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        function syncSearch(val) {
+            const term = val.toLowerCase();
+            const sections = document.querySelectorAll('.searchable');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Также синхронизируем оба инпута
+            document.querySelector('.mobile-search').value = val;
+            document.querySelector('.desktop-search').value = val;
+
+            sections.forEach(section => {
+                const text = section.innerText.toLowerCase();
+                const navId = section.getAttribute('id');
+                const navLink = document.querySelector(`.nav-item[href="#${navId}"]`);
+
+                if (text.includes(term)) {
+                    section.style.display = 'block';
+                    if(navLink) navLink.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                    if(navLink) navLink.style.display = 'none';
+                }
+            });
+        }
+
+        // Подсветка активного пункта
+        window.addEventListener('scroll', () => {
+            let current = "";
+            const sections = document.querySelectorAll('.searchable');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            sections.forEach(section => {
+                if (pageYOffset >= section.offsetTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href').slice(1) === current) item.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
