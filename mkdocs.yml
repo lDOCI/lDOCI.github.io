@@ -1,0 +1,77 @@
+site_name: FlashForge Adventurer 5M / 5M Pro / 5X — База знаний
+site_url: https://ldoci.github.io/
+site_description: Практическая вики по принтерам FlashForge Adventurer 5M / 5M Pro / 5X
+docs_dir: docs
+
+theme:
+  name: material
+  language: ru
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.top
+    - navigation.sections
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep orange
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Тёмная тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep orange
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Светлая тема
+
+markdown_extensions:
+  - toc:
+      permalink: true
+      permalink_title: Ссылка на этот раздел
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+
+plugins:
+  - search:
+      lang: ru
+
+nav:
+  - Главная: index.md
+  - Термины и сокращения: Термины.md
+  - Частые проблемы (FAQ): Решение-проблем.md
+  - Общее: Общее.md
+  - Прошивка: Прошивка.md
+  - Калибровка: Калибровка.md
+  - Обслуживание: Обслуживание.md
+  - Печать: Печать.md
+  - Дефекты печати: Дефекты-печати.md
+  - Материалы: Материалы.md
+  - Слайсер и профили: Слайсер-и-профили.md
+  - Электроника и железо: Электроника.md
+  - Сеть и удалёнка: Сеть-и-удалёнка.md
+  - Модификации: Модификации.md
+  - Исправление ошибок: Исправление-ошибок.md
+  - AD5X:
+    - Старт и различия: AD5X-Старт-и-различия.md
+    - Прошивка и калибровка: AD5X-Прошивка.md
+    - Реверс и железо: AD5X-Реверс.md
+    - Печатные модификации: AD5X-Печатные-модификации.md
+    - Корпус и панели: AD5X-Корпус.md
