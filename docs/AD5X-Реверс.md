@@ -15,6 +15,7 @@
 * **Принципиальная схема IFS:** [Скачать PDF](https://github.com/lDOCI/Flashforge/releases/download/Adventurer/ifs_shema.pdf)
 * **Бекап прошивки IFS (v3.0.6):** [Скачать дамп](https://github.com/lDOCI/Flashforge/releases/download/Adventurer/ifc_3.0.6_becup.hex)
 * **Расшифровка протокола IFS:** [Скачать таблицу XLSX](https://github.com/lDOCI/Flashforge/releases/download/Adventurer/_._ifc_._._3_0_1.xlsx)
+* **Энкодер IFS (схема):** [Открыть PDF](assets/pdf/AD5X-энкодер-IFS.pdf)
 
 [Наверх](#оглавление)
 
